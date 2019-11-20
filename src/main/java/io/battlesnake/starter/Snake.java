@@ -2,12 +2,16 @@ package io.battlesnake.starter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.Response;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static spark.Spark.port;
@@ -119,6 +123,46 @@ public class Snake {
          */
         public Map<String, String> move(JsonNode moveRequest) {
             Map<String, String> response = new HashMap<>();
+            
+            JsonNode board = (JsonNode)moveRequest.get("board");
+            int height = Integer.parseInt((moveRequest.get("height").asText()));
+            int width = Integer.parseInt((moveRequest.get("height").asText()));
+            JsonNode food = board.get("food");
+            List<Food> list = new ArrayList<>();
+            if (food.isArray()){
+                for (int i = 0; i < food.size(); i ++){
+                JsonNode obj = food.get(i);
+                    list.add(new Food(Integer.parseInt(obj.get("x").asText()), Integer.parseInt(obj.get("y").asText())));
+                }
+            }
+            //else list.add(new Food(Integer.parseInt(food.get("x").asText()), Integer.parseInt(food.get("y").asText())));
+
+            JsonNode snakes = moveRequest.get("snakes");
+            List<Enemy> listOfSnakes = new ArrayList<>();
+            if (snakes.isArray()){
+                for (int i = 0; i < snakes.size(); i ++){
+                    JsonNode body = snakes.get(i).get("body");
+
+                        if (body.isArray()){
+                            Enemy snake = new Enemy();
+                            for (int j = 0; j < body.size(); j ++){
+                                JsonNode obj = body.get(j);
+                                snake.body.add(new SnakeBody(Integer.parseInt(obj.get("x").asText()), Integer.parseInt(obj.get("y").asText())));
+                            }
+                            listOfSnakes.add(snake);
+                        }
+                    }
+                }
+                        JsonNode me = moveRequest.get("you");
+                        List<SnakeBody> myBody = new ArrayList<>();
+                        JsonNode body = me.get("body");
+                        for (int j = 0; j < body.size(); j ++){
+                                JsonNode obj = body.get(j);
+                                myBody.add(new SnakeBody(Integer.parseInt(obj.get("x").asText()), Integer.parseInt(obj.get("y").asText())));
+                            }
+                        
+                
+            
             response.put("move", "right");
             return response;
         }
